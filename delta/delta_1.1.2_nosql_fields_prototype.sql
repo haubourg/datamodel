@@ -57,7 +57,9 @@ SELECT re.obj_id,
     ne.fk_wastewater_structure,
     -- start custom section network elements
     ne.custom_data_hstore, -- only here for demo purpose TO BE REMOVED
-    ne.custom_data_hstore -> 'topobase_id'::text as topobase_id, -- example of a key extracted as a filed
+    (ne.custom_data_hstore -> 'topobase_id')::text as topobase_id, -- example of a key extracted as a field
+    (ne.custom_data_hstore -> 'materiau_radier')::text as materiau_radier, -- example of a key extracted as a fields
+    (ne.custom_data_hstore -> 'pully_controle')::text as pully_controle, -- example of a key extracted as a fields
     -- ne.custom_data_json, -- jsonb fields are not correctly handled by QGIS 3.4(interpreted as hstore)
     -- end of custom section for network elements
     ch.bedding_encasement AS ch_bedding_encasement,
@@ -284,9 +286,8 @@ BEGIN
                 , NEW.fk_provider -- fk_provider
                 , NEW.fk_wastewater_structure -- fk_wastewater_structure
                 -- start of custom data section for network element
-                , ('"topobase_id" => "' || NEW.topobase_id || '" ')::hstore
+                , ('"topobase_id" => "' || NEW.topobase_id || '", "materiau_radier" => "' || NEW.materiau_radier || '", "pully_controle" => "' || NEW.pully_controle || '"' ) ::hstore
                 -- end of custom data section for network element
-
                )
                RETURNING obj_id INTO NEW.obj_id;
 
@@ -423,7 +424,7 @@ CREATE OR REPLACE RULE vw_qgep_reach_on_update AS ON UPDATE TO qgep_od.vw_qgep_r
       , fk_provider = NEW.fk_provider
       , fk_wastewater_structure = NEW.fk_wastewater_structure
       -- start of custom data section for network element
-      , custom_data_hstore = custom_data_hstore || ('"topobase_id" => "' || NEW.topobase_id || '" ')::hstore
+      , custom_data_hstore = custom_data_hstore || ('"topobase_id" => "' || NEW.topobase_id || '", "materiau_radier" => "' || NEW.materiau_radier || '", "pully_controle" => "' || NEW.pully_controle || '"' ) ::hstore
       -- end of custom data section for network element
       -- , custom_data_json = NEW.custom_data_json::jsonb
 
