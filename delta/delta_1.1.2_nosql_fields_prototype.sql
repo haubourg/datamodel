@@ -12,6 +12,9 @@ COMMENT ON COLUMN qgep_od.wastewater_networkelement.custom_data_hstore IS 'Hstor
 ALTER TABLE qgep_od.wastewater_networkelement ADD COLUMN custom_data_json jsonb;
 COMMENT ON COLUMN qgep_od.wastewater_networkelement.custom_data_json IS 'JSONB  field to store additional information not fitting into the standard';
 
+-- adds index for the specific keys
+
+CREATE INDEX ne_custom_data_idx ON testhstore USING GIST (custom_data);
 
 
 DROP VIEW IF EXISTS qgep_od.vw_qgep_reach;
