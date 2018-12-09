@@ -1,4 +1,4 @@
-﻿
+
 DROP VIEW IF EXISTS qgep_od.vw_qgep_reach;
 
 CREATE OR REPLACE VIEW qgep_od.vw_qgep_reach AS
@@ -40,8 +40,6 @@ SELECT re.obj_id,
     ne.fk_dataowner,
     ne.fk_provider,
     ne.fk_wastewater_structure,
-    ne.custom_data_hstore,
-    ne.custom_data_json,
     ch.bedding_encasement AS ch_bedding_encasement,
     ch.connection_type AS ch_connection_type,
     ch.jetting_interval AS ch_jetting_interval,
@@ -253,9 +251,7 @@ BEGIN
             , last_modification
             , fk_dataowner
             , fk_provider
-            , fk_wastewater_structure
-            , custom_data_hstore
-            , custom_data_json )
+            , fk_wastewater_structure )
     VALUES ( COALESCE(NEW.obj_id,qgep_sys.generate_oid('qgep_od','reach')) -- obj_id
             , NEW.identifier -- identifier
             , NEW.remark -- remark
@@ -263,9 +259,6 @@ BEGIN
             , NEW.fk_dataowner -- fk_dataowner
             , NEW.fk_provider -- fk_provider
             , NEW.fk_wastewater_structure -- fk_wastewater_structure
-            -- start of custom data section for network element
-            , ('"topobase_id" => "' || NEW.topobase_id || '" ')::hstore
-            -- end of custom data section for network element
            )
            RETURNING obj_id INTO NEW.obj_id;
 
@@ -401,10 +394,6 @@ CREATE OR REPLACE RULE vw_qgep_reach_on_update AS ON UPDATE TO qgep_od.vw_qgep_r
       , fk_dataowner = NEW.fk_dataowner
       , fk_provider = NEW.fk_provider
       , fk_wastewater_structure = NEW.fk_wastewater_structure
-      -- start of custom data section for network element
-      , custom_data_hstore = custom_data_hstore || ('"topobase_id" => "' || NEW.topobase_id || '" ')::hstore
-      -- end of custom data section for network element
-
     WHERE obj_id = OLD.obj_id;
 
   UPDATE qgep_od.reach
@@ -444,8 +433,3 @@ ALTER VIEW qgep_od.vw_qgep_reach ALTER obj_id SET DEFAULT qgep_sys.generate_oid(
 ALTER VIEW qgep_od.vw_qgep_reach ALTER rp_from_obj_id SET DEFAULT qgep_sys.generate_oid('qgep_od','reach_point');
 ALTER VIEW qgep_od.vw_qgep_reach ALTER rp_to_obj_id SET DEFAULT qgep_sys.generate_oid('qgep_od','reach_point');
 ALTER VIEW qgep_od.vw_qgep_reach ALTER fk_wastewater_structure SET DEFAULT qgep_sys.generate_oid('qgep_od','channel');
-
-
-COMMENT ON COLUMN qgep_od.vw_qgep_reach.custom_data_hstore IS 'key/value hstore data to expose additionnal data not in the core of the standard';
-
-COMMENT ON COLUMN qgep_od.vw_qgep_reach.custom_data_json IS 'jsonb data to expose additionnal data not in the core of the standard';
